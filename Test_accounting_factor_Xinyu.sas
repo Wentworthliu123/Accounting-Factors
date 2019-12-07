@@ -611,20 +611,6 @@ data data2;
 		woGW=0;
 	tang=(che+rect*0.715+invt*0.547+ppent*0.535)/at;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	if (2100<=sic<=2199) or (2080<=sic<=2085) or (naics in ('7132', '71312', 
 		'713210', '71329', '713290', '72112', '721120')) then
 			sin=1;
@@ -647,6 +633,13 @@ data data2;
 	pchsaleinv=((sale/invt)-(lag(sale)/lag(invt)) ) / (lag(sale)/lag(invt));
 	cashdebt=(ib+dp)/((lt+lag(lt))/2);
 	realestate=(fatb+fatl)/ppegt;
+
+
+
+
+
+
+
 
 	if missing(ppegt) then
 		realestate=(fatb+fatl)/ppent;
