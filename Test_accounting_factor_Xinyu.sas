@@ -634,13 +634,6 @@ data data2;
 	cashdebt=(ib+dp)/((lt+lag(lt))/2);
 	realestate=(fatb+fatl)/ppegt;
 
-
-
-
-
-
-
-
 	if missing(ppegt) then
 		realestate=(fatb+fatl)/ppent;
 
@@ -678,6 +671,8 @@ data data2;
 		rd=0;
 	rdbias=(xrd/lag(xrd))-1-ib/lag(ceq);
 	roe=ib/lag(ceq);
+
+	
 	ps_beme=coalesce(pstkrv, pstkl, pstk, 0);
 
 	if missing(txditc) then
@@ -721,6 +716,12 @@ data data2;
 
 	if (txfo+txfed>0 or txt>txdi) and ib<=0 then
 		tb_1=1;
+
+
+
+
+
+
 	*variables that will be used in subsequent steps to get to final RPS;
 	*--prep for for Mohanram (2005) score;
 	roa=ni/((at+lag(at))/2);
