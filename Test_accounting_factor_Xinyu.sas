@@ -717,11 +717,6 @@ data data2;
 	if (txfo+txfed>0 or txt>txdi) and ib<=0 then
 		tb_1=1;
 
-
-
-
-
-
 	*variables that will be used in subsequent steps to get to final RPS;
 	*--prep for for Mohanram (2005) score;
 	roa=ni/((at+lag(at))/2);
@@ -740,6 +735,9 @@ data data2;
 	rds=xrd/sale;
 	ol=(cogs+xsga)/at;
 	rc_1=xrd+0.8*lag(xrd)+0.6*lag2(xrd)+0.4*lag3(xrd)+0.2*lag4(xrd);
+
+
+
 	rca=rc_1/at;
 	x_1=txt/(pi+am);
 	eps_1=ajex/prcc_f;
