@@ -547,12 +547,6 @@ data data2;
 	cfp=(ib-((act-lag(act) - (che-lag(che))) 
 		- ((lct-lag(lct))-(dlc-lag(dlc))-(txp-lag(txp))-dp) ))/mve_f;
 
-
-
-
-
-
-
 	if not missing(oancf) then
 		cfp=oancf/mve_f;
 	absacc=abs(acc);
@@ -736,8 +730,6 @@ data data2;
 	ol=(cogs+xsga)/at;
 	rc_1=xrd+0.8*lag(xrd)+0.6*lag2(xrd)+0.4*lag3(xrd)+0.2*lag4(xrd);
 
-
-
 	rca=rc_1/at;
 	x_1=txt/(pi+am);
 	eps_1=ajex/prcc_f;
@@ -832,6 +824,8 @@ data data2;
 	cop=(revt-cogs-xsga+xrd-(rect-lag(rect))-(invt-lag(invt))-(xpp-lag(xpp))+drc-lag(drc)+drlt-lag(drlt)+ap-lag(ap)+xacc-lag(xacc))/at;
 	cla=(revt-cogs-xsga+xrd-(rect-lag(rect))-(invt-lag(invt))-(xpp-lag(xpp))+drc-lag(drc)+drlt-lag(drlt)+ap-lag(ap)+xacc-lag(xacc))/lag(at);
 
+
+
 	if lt>at then
 		i_1=1;
 	else
@@ -855,6 +849,13 @@ data data2;
 	pchgm_pchsale_hxz=(gm_1-lag(gm_1))/(0.5*(gm_1+lag(gm_1)))-(sale-lag(sale))/(0.5*sale+0.5*lag(sale));
 	pchsale_pchxsga_hxz=(sale-lag(sale))/(0.5*sale+0.5*lag(sale))-(xsga-lag(xsga))/(0.5*xsga+0.5*lag(xsga));
 	realestate_hxz=(fatb+fatl)/ppegt;
+
+
+
+
+
+
+
 
 	if missing(fatb) then
 		realestate_hxz=(ppenb+ppenls)/ppent;
