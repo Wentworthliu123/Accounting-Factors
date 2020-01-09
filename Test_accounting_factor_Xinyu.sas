@@ -8,7 +8,7 @@ Major adjustments to get this code run:
 4. updating comp.company to comp.names to acess naics and sic
 5. adding work space cleaning process in the beginning 
 6. remember to set you own path before running this file
-7. delete one redundent 'dp' input from sql
+
 ********************************;
 
 proc datasets library=work kill nolist;
@@ -54,7 +54,7 @@ proc sql;
 		datadate_a, fyear, c.cik, cat(sic, 1, 2) as sic2, sic, naics, 
 		/*firm variables*/
 		/*income statement*/
-		sale, revt, cogs, xsga, xrd, xad, ib, ebitda, ebit, nopi, spi, pi, txp, 
+		sale, revt, cogs, xsga, dp, xrd, xad, ib, ebitda, ebit, nopi, spi, pi, txp, 
 		ni, txfed, txfo, txt, xint, /*CF statement and others*/
 		capx, oancf, dvt, ob, gdwlia, gdwlip, gwo, /*assets*/
 		rect, act, che, ppegt, invt, at, aco, intan, ao, ppent, gdwl, fatb, fatl, 
@@ -70,7 +70,7 @@ proc sql;
 		f.gvkey=c.gvkey
 		/*get consolidated, standardized, industrial format statements*/
 		and not missing(at) and not missing(prcc_f) and not missing(ni) and 
-		datadate>='01Jan2016'd and f.indfmt='INDL' and f.datafmt='STD' and 
+		datadate>='01Jan2015'd and f.indfmt='INDL' and f.datafmt='STD' and 
 		f.popsrc='D' and f.consol='C';
 quit;
 
@@ -313,7 +313,7 @@ run;
 	%put ;
 %mend crspmerge;
 
-%crspmerge(s=m, start=01July2017, end=30jun2018, sfvars=&dsfvars, 
+%crspmerge(s=m, start=01Jan2015, end=30jun2018, sfvars=&dsfvars, 
 	sevars=&dsevars, filters=exchcd in (1, 2, 3) and shrcd in (10, 11));
 
 /*new*/
@@ -500,12 +500,31 @@ data data;
 		xsga=0;
 run;
 
+/*
+look at how many missing;
+data test;
+set data;
+where datadate>='01Jan2015'd;
+array lst{*} xrd nopi xad dvt ob dm dc aco ap intan ao lco lo rect invt drc drlt dr spi gdwl emp dm dcvt fatb fatl che dp lct act xsga at;
+array dms{*} dxrd dnopi dxad ddvt dob ddm ddc daco dap dintan dao dlco dlo drect dinvt ddrc ddrlt ddr dspi dgdwl demp ddm ddcvt dfatb dfatl dche ddp dlct dact dxsga dat;
+do i=1 to dim(lst);
+if lst(i)=. then dms(i)=1; else dms(i)=0;
+end;
+run;
+proc means data=test mean sum ;
+var dxrd dnopi dxad ddvt dob ddm ddc daco dap dintan dao dlco dlo drect dinvt ddrc ddrlt ddr dspi dgdwl demp ddm ddcvt dfatb dfatl dche ddp dlct dact dxsga dat;
+run;
+endrsubmit;	*/
+*xsga also has a fair amount missing...;
 
 /*--------------------------------------------------------
 
 more clean-up and create first pass of variables
 
 ----------------------------------------------------------*/
+
+
+
 data data2;
 	set data;
 
@@ -567,8 +586,6 @@ data data2;
 
 	if missing(emp) or missing(lag(emp)) then
 		hire=0;
-		
-		
 	sgr=(sale/lag(sale))-1;
 	chpm=(ib/sale)-(lag(ib)/lag(sale));
 	chato=(sale/((at+lag(at))/2)) - (lag(sale)/((lag(at)+lag2(at))/2));
@@ -665,8 +682,6 @@ data data2;
 		rd=0;
 	rdbias=(xrd/lag(xrd))-1-ib/lag(ceq);
 	roe=ib/lag(ceq);
-
-	
 	ps_beme=coalesce(pstkrv, pstkl, pstk, 0);
 
 	if missing(txditc) then
@@ -710,7 +725,6 @@ data data2;
 
 	if (txfo+txfed>0 or txt>txdi) and ib<=0 then
 		tb_1=1;
-
 	*variables that will be used in subsequent steps to get to final RPS;
 	*--prep for for Mohanram (2005) score;
 	roa=ni/((at+lag(at))/2);
@@ -729,7 +743,6 @@ data data2;
 	rds=xrd/sale;
 	ol=(cogs+xsga)/at;
 	rc_1=xrd+0.8*lag(xrd)+0.6*lag2(xrd)+0.4*lag3(xrd)+0.2*lag4(xrd);
-
 	rca=rc_1/at;
 	x_1=txt/(pi+am);
 	eps_1=ajex/prcc_f;
@@ -824,8 +837,6 @@ data data2;
 	cop=(revt-cogs-xsga+xrd-(rect-lag(rect))-(invt-lag(invt))-(xpp-lag(xpp))+drc-lag(drc)+drlt-lag(drlt)+ap-lag(ap)+xacc-lag(xacc))/at;
 	cla=(revt-cogs-xsga+xrd-(rect-lag(rect))-(invt-lag(invt))-(xpp-lag(xpp))+drc-lag(drc)+drlt-lag(drlt)+ap-lag(ap)+xacc-lag(xacc))/lag(at);
 
-
-
 	if lt>at then
 		i_1=1;
 	else
@@ -849,13 +860,6 @@ data data2;
 	pchgm_pchsale_hxz=(gm_1-lag(gm_1))/(0.5*(gm_1+lag(gm_1)))-(sale-lag(sale))/(0.5*sale+0.5*lag(sale));
 	pchsale_pchxsga_hxz=(sale-lag(sale))/(0.5*sale+0.5*lag(sale))-(xsga-lag(xsga))/(0.5*xsga+0.5*lag(xsga));
 	realestate_hxz=(fatb+fatl)/ppegt;
-
-
-
-
-
-
-
 
 	if missing(fatb) then
 		realestate_hxz=(ppenb+ppenls)/ppent;
@@ -933,3 +937,90 @@ data data2;
 			roavol_a=.;
 		end;
 run;
+
+
+/*other preparation steps for annual variables: industry adjustments*/
+proc sql;
+	create table data2 as select *, chpm-mean(chpm) as chpmia, chato-mean(chato) 
+		as chatoia, sum(sale) as indsale, hire-mean(hire) as chempia, bm-mean(bm) as 
+		bm_ia, pchcapx-mean(pchcapx) as pchcapx_ia, tb_1-mean(tb_1) as tb, 
+		cfp-mean(cfp) as cfp_ia, mve_f-mean(mve_f) as mve_ia, /*HXZ*/
+		sum(at) as indat, sum(BE) as indbe, pchcapx_hxz-mean(pchcapx_hxz) as 
+		pchcapx_ia_hxz from data2 group by sic2, fyear;
+quit;
+
+proc sql;
+	create table data2 as select *, sum((sale/indsale)*(sale/indsale) ) as herf, 
+		/*HXZ*/
+		sum((at/indat)*(at/indat)) as ha, sum((BE/indbe)*(BE/indbe)) as he from data2 
+		group by sic2, fyear;
+quit;
+
+*---industry measures for ms----;
+
+proc sort data=data2;
+	by fyear sic2;
+run;
+
+proc univariate data=data2 noprint;
+	by fyear sic2;
+	var roa cfroa xrdint capxint xadint;
+	output out=indmd median=md_roa md_cfroa md_xrdint md_capxint md_xadint;
+run;
+
+proc sql;
+	create table data2 as select * from data2 a left join indmd b on 
+		a.fyear=b.fyear and a.sic2=b.sic2;
+quit;
+
+proc sort data=data2 nodupkey;
+	by gvkey datadate;
+run;
+
+data data2;
+	set data2;
+	*more for Mohanram score;
+
+	if roa>md_roa then
+		m1=1;
+	else
+		m1=0;
+
+	if cfroa>md_cfroa then
+		m2=1;
+	else
+		m2=0;
+
+	if oancf>ni then
+		m3=1;
+	else
+		m3=0;
+
+	if xrdint>md_xrdint then
+		m4=1;
+	else
+		m4=0;
+
+	if capxint>md_capxint then
+		m5=1;
+	else
+		m5=0;
+
+	if xadint>md_xadint then
+		m6=1;
+	else
+		m6=0;
+	*still need to add another thing for Mohanram (2005) score;
+run;
+
+/* *----add credit rating--------; */
+/*  */
+/* proc sql; */
+/* 	create table data2 as select a.*, b.splticrm from data2 a left join  */
+/* 		compr.adsprate b on a.gvkey=b.gvkey and year(a.datadate)=year(b.datadate); */
+/* quit; */
+/*  */
+/* proc sort data=data2 nodupkey; */
+/* 	by gvkey datadate; */
+/* run; */
+
